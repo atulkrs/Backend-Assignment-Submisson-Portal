@@ -1,0 +1,19 @@
+# Node.js dependencies
+node_modules/
+
+# Environment variables
+.env
+
+# IDE files
+.vscode/
+.idea/
+*.sublime-workspace
+
+# Build directories
+dist/
+build/
+
+# Logs
+logs
+*.log
+npm-debug.log*
