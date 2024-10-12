@@ -24,7 +24,7 @@ step 5. npm install body-parser
 
 # Run this project
 
-npm server.js
+node server.js
 
 ***Your project will start running on the localhost:5000***
 
@@ -38,8 +38,8 @@ You can use Postman for testing Endpoints
        *** http://localhost:5000/api/users/register ***
 
         {
-            "username" : "name",  // Replace with your actual name
-            "password" : "yourpassword" // Replace with actual password
+            "username": "name",  // Replace with your actual name
+            "password": "your password" // Replace with the actual password
         }
 
 
@@ -54,7 +54,7 @@ You can use Postman for testing Endpoints
         {
             "userId": "67083a637fc902be75a88d87", // Replace with your actual UserId
             "task": "Your assignment task",
-            "admin": "myadmin" // Replace with you actual Admin name
+            "admin": "admin" // Replace with your actual Admin name
         }
          
 
@@ -67,8 +67,8 @@ You can use Postman for testing Endpoints
        *** http://localhost:5000/api/admins/register ***
 
        {
-            "username" : "name",  // Replace with your actual name
-            "password" : "yourpassword" // Replace with actual password
+            "username": "name",  // Replace with your actual name
+            "password": "your password" // Replace with the actual password
         }
        
 
