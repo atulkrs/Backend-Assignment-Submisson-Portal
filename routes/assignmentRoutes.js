@@ -1,86 +1,74 @@
-const express = require('express');
-const { body, validationResult } = require('express-validator');
-const Assignment = require('../models/assignment'); 
+const express = require("express");
+const { body, validationResult } = require("express-validator");
+const Assignment = require("../models/assignment");
+const User = require("../models/user"); // Import the User model
 const router = express.Router();
 
 // Upload assignment route
-router.post('/upload', [
-    body('userId').notEmpty().withMessage('User ID is required'),
-    body('task').notEmpty().withMessage('Task is required'),
-    body('admin').notEmpty().withMessage('Admin username is required'),
-], async (req, res) => {
-    console.log(req.body);
+router.post(
+  "/upload",
+  [
+    body("userId").notEmpty().withMessage("Username is required"),
+    body("task").notEmpty().withMessage("Task is required"),
+    body("admin").notEmpty().withMessage("Admin is required"),
+  ],
+  async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
+      return res.status(400).json({ errors: errors.array() });
     }
 
     const { userId, task, admin } = req.body;
 
     try {
-        // Create a new assignment
-        const newAssignment = new Assignment({ userId, task, admin });
-        await newAssignment.save();
+      const uniqueLabel = `Upload Time - ${new Date().toISOString()}`;
+      console.time(uniqueLabel);
 
-        res.status(201).json({ msg: 'Assignment uploaded successfully', assignment: newAssignment });
+      // Check if the user exists and has the role 'user'
+      const user = await User.findOne({ username: userId, role: "user" });
+      if (!user) {
+        return res
+          .status(404)
+          .json({ msg: "No users exist with the given username" });
+      }
+
+      // Check if the admin exists and get their ObjectId
+      const adminUser = await User.findOne({ username: admin, role: "admin" });
+      if (!adminUser) {
+        return res.status(404).json({ msg: "Admin does not exist" });
+      }
+
+      // Check if the same assignment already exists
+      const existingAssignment = await Assignment.findOne({
+        userId: user._id,
+        task,
+        admin: adminUser._id,
+      });
+      if (existingAssignment) {
+        return res.status(400).json({ msg: "Assignment already uploaded" });
+      }
+
+      const assignment = new Assignment({
+        userId: user._id,
+        task,
+        admin: adminUser._id,
+      });
+      await assignment.save();
+
+      const populatedAssignment = await Assignment.findById(assignment._id)
+        .populate("userId", "username")
+        .populate("admin", "username");
+
+      console.timeEnd(uniqueLabel);
+      res.status(201).json({
+        msg: "Assignment uploaded successfully",
+        assignment: populatedAssignment,
+      });
     } catch (err) {
-        console.error(err.message);
-        res.status(500).send('Server Error');
+      console.error(err.message);
+      res.status(500).send("Server error");
     }
-});
-
-// Admin View Assignments route
-router.get('/admins/:adminUsername', async (req, res) => {
-    const { adminUsername } = req.params;
-
-    try {
-        // Fetch assignments for the specified admin
-        const assignments = await Assignment.find({ admin: adminUsername });
-        res.status(200).json(assignments);
-    } catch (err) {
-        console.error(err.message);
-        res.status(500).send('Server Error');
-    }
-});
-
-// Accept assignment route
-router.post('/accept/:id', async (req, res) => {
-    const assignmentId = req.params.id;
-
-    try {
-        const assignment = await Assignment.findById(assignmentId);
-        if (!assignment) {
-            return res.status(404).json({ msg: 'Assignment not found' });
-        }
-
-        assignment.status = 'accepted';
-        await assignment.save();
-
-        res.status(200).json({ msg: 'Assignment accepted', assignment });
-    } catch (err) {
-        console.error(err.message);
-        res.status(500).send('Server Error');
-    }
-});
-
-// Reject assignment route
-router.post('/reject/:id', async (req, res) => {
-    const assignmentId = req.params.id;
-
-    try {
-        const assignment = await Assignment.findById(assignmentId);
-        if (!assignment) {
-            return res.status(404).json({ msg: 'Assignment not found' });
-        }
-
-        assignment.status = 'rejected';
-        await assignment.save();
-
-        res.status(200).json({ msg: 'Assignment rejected', assignment });
-    } catch (err) {
-        console.error(err.message);
-        res.status(500).send('Server Error');
-    }
-});
+  }
+);
 
 module.exports = router;

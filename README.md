@@ -19,7 +19,6 @@ step 2. npm install express
 step 3. npm install mongoose
 step 4. npm install dotenv
 step 5. npm install body-parser
-step 6. npm install cors
 
 
 
@@ -78,15 +77,17 @@ You can use Postman for testing Endpoints
 
 
     - `GET /assignments` - View assignments tagged to the admin.
-       *** http://localhost:5000/api/users/assignments/admins/adminname(replace with actual admin name to whom you have uploaded) ***
+       *** http://localhost:5000/api/admins/assignments/admins/adminname(replace with actual admin name to whom you have uploaded) ***
 
+       `GET /users` - fetch all users.
+       *** http://localhost:5000/api/admins/users ***
 
     - `POST /assignments/:id/accept` - Accept an assignment.
-       *** http://localhost:5000/api/admins/assignments/:id(replace with your actula id)/accept ***
+       *** http://localhost:5000/api/admins/assignments/:id/accept ***
 
 
     - `POST /assignments/:id/reject` - Reject an assignment. 
-       *** http://localhost:5000/api/admins/assignments/:id(replace with your actual id)/reject ***
+       *** http://localhost:5000/api/admins/assignments/:id/reject ***
 
 
 

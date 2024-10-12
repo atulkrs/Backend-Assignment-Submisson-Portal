@@ -1,23 +1,29 @@
 const mongoose = require("mongoose");
 
-const AssignmentSchema = new mongoose.Schema({
-  task: {
-    type: String,
-    required: true,
+const assignmentSchema = new mongoose.Schema(
+  {
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Members",
+      required: true,
+    },
+    task: {
+      type: String,
+      required: true,
+    },
+    admin: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Members",
+      required: true,
+    },
+    status: {
+      type: String,
+      default: "pending",
+    },
   },
-  userId: {
-    type: String,
-    required: true,
-  },
-  admin: {
-    type: String, // Reference to the Admin's userId
-    required: true,
-  },
-  status: {
-    type: String,
-    enum: ["pending", "accepted", "rejected"],
-    default: "pending",
-  },
-});
+  { timestamps: true }
+);
 
-module.exports = mongoose.model("Assignment", AssignmentSchema);
+const Assignment = mongoose.model("Assignment", assignmentSchema);
+
+module.exports = Assignment;

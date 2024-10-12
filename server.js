@@ -4,7 +4,6 @@ const userRoutes = require('./routes/userRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const assignmentRoutes = require('./routes/assignmentRoutes');
 const bodyParser = require('body-parser');
-const cors = require('cors');
 const dotenv = require('dotenv');
 
 // Load environment variables
@@ -15,8 +14,6 @@ connectDB();
 
 const app = express();
 
-// Middleware
-app.use(cors());
 app.use(bodyParser.json()); // To parse JSON requests
 
 // API Endpoints

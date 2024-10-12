@@ -33,8 +33,12 @@ router.post(
       console.log("New Admin Created:", admin);
 
       res.status(201).json({
-        msg: "Admin registered successfully",
-        admin: { username: admin.username, role: admin.role },
+        msg: "Member registered successfully",
+        member: {
+          id: admin._id,
+          username: admin.username,
+          role: admin.role,
+        },
       });
     } catch (err) {
       console.error(err.message);
@@ -75,7 +79,11 @@ router.post(
       // Send response on successful login
       res.status(200).json({
         msg: "Admin login successful",
-        admin: { username: admin.username, role: admin.role },
+        member: {
+          id: admin._id,
+          username: admin.username,
+          role: admin.role,
+        },
       });
     } catch (err) {
       console.error(err.message);
@@ -83,13 +91,58 @@ router.post(
     }
   }
 );
+router.get("/users", async (req, res) => {
+  try {
+    // Find all users with the role 'user'
+    const users = await User.find({ role: "user" });
+
+    // Check if any users exist
+    if (!users.length) {
+      return res.status(404).json({ msg: "No users found" });
+    }
+
+    const formattedUsers = users.map((user) => ({
+      id: user._id,
+      username: user.username,
+      role: user.role,
+    }));
+
+    res.status(200).json(formattedUsers);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Server Error");
+  }
+});
 
 // View assignments route
-router.get("/assignments", async (req, res) => {
+router.get("/assignments/admins/:username", async (req, res) => {
+  const { username } = req.params;
+
   try {
-    // Fetch assignments assigned to this admin
-    const assignments = await Assignment.find({ admin: req.admin.id });
-    res.status(200).json(assignments);
+    const admin = await User.findOne({ username, role: "admin" });
+    if (!admin) {
+      return res.status(404).json({ msg: "Admin not found" });
+    }
+
+    const assignments = await Assignment.find({ admin: admin._id })
+      .populate("userId", "username")
+      .populate("admin", "username");
+
+    const formattedAssignments = assignments.map((assignment) => ({
+      user: {
+        id: assignment.userId ? assignment.userId._id : null,
+        name: assignment.userId ? assignment.userId.username : "Unknown User",
+      },
+      task: assignment.task,
+      createdAt: assignment.createdAt,
+      status: assignment.status,
+      admin: {
+        id: admin._id,
+        name: admin.username,
+      },
+    }));
+
+    res.status(200).json(formattedAssignments);
   } catch (err) {
     console.error(err.message);
     res.status(500).send("Server Error");
@@ -100,15 +153,36 @@ router.get("/assignments", async (req, res) => {
 router.post("/assignments/:id/accept", async (req, res) => {
   const assignmentId = req.params.id;
   try {
-    const assignment = await Assignment.findById(assignmentId);
+    const assignment = await Assignment.findById(assignmentId)
+      .populate("userId", "username")
+      .populate("admin", "username");
+
     if (!assignment) {
       return res.status(404).json({ msg: "Assignment not found" });
     }
 
+    // Update the assignment status to accepted
     assignment.status = "accepted";
     await assignment.save();
 
-    res.status(200).json({ msg: "Assignment accepted", assignment });
+    res.status(200).json({
+      msg: "Assignment accepted",
+      assignment: {
+        id: assignment._id,
+        user: {
+          id: assignment.userId._id,
+          username: assignment.userId.username,
+        },
+        task: assignment.task,
+        admin: {
+          id: assignment.admin._id,
+          username: assignment.admin.username,
+        },
+        status: assignment.status,
+        createdAt: assignment.createdAt,
+        updatedAt: assignment.updatedAt,
+      },
+    });
   } catch (err) {
     console.error(err.message);
     res.status(500).send("Server Error");
@@ -119,15 +193,36 @@ router.post("/assignments/:id/accept", async (req, res) => {
 router.post("/assignments/:id/reject", async (req, res) => {
   const assignmentId = req.params.id;
   try {
-    const assignment = await Assignment.findById(assignmentId);
+    const assignment = await Assignment.findById(assignmentId)
+      .populate("userId", "username")
+      .populate("admin", "username");
+
     if (!assignment) {
       return res.status(404).json({ msg: "Assignment not found" });
     }
 
+    // Update the assignment status to rejected
     assignment.status = "rejected";
     await assignment.save();
 
-    res.status(200).json({ msg: "Assignment rejected", assignment });
+    res.status(200).json({
+      msg: "Assignment rejected",
+      assignment: {
+        id: assignment._id,
+        user: {
+          id: assignment.userId._id,
+          username: assignment.userId.username,
+        },
+        task: assignment.task,
+        admin: {
+          id: assignment.admin._id,
+          username: assignment.admin.username,
+        },
+        status: assignment.status,
+        createdAt: assignment.createdAt,
+        updatedAt: assignment.updatedAt,
+      },
+    });
   } catch (err) {
     console.error(err.message);
     res.status(500).send("Server Error");
