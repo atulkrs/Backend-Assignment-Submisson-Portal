@@ -52,7 +52,7 @@ You can use Postman for testing Endpoints
        *** http://localhost:5000/api/users/assignments/upload ***
 
         {
-            "userId": "67083a637fc902be75a88d87", // Replace with your actual UserId
+            "userId": "abcd", // Replace with your actual UserId(username)
             "task": "Your assignment task",
             "admin": "admin" // Replace with your actual Admin name
         }
@@ -77,7 +77,7 @@ You can use Postman for testing Endpoints
 
 
     - `GET /assignments` - View assignments tagged to the admin.
-       *** http://localhost:5000/api/admins/assignments/admins/adminname(replace with actual admin name to whom you have uploaded) ***
+       *** http://localhost:5000/api/admins/assignments/admins/adminname ***
 
        `GET /users` - fetch all users.
        *** http://localhost:5000/api/admins/users ***
